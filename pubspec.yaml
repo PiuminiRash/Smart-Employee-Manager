@@ -1,0 +1,39 @@
+name: smart_employee_manager
+description: "A new Flutter project for Smart Employee Manager assignment."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI eke icons walata
+  cupertino_icons: ^1.0.8
+
+  # MockAPI ekka CRUD (GET, POST, PUT, DELETE) karanna
+  http: ^1.1.0
+
+  # MVVM architecture eka saha data handle karanna (State Management)
+  provider: ^6.1.1
+
+  # Google fonts pavichchi karala UI eka professional karanna
+  google_fonts: ^6.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code eka clean widiyata thiyaganna
+  flutter_lints: ^3.0.0
+
+flutter:
+  # Material Design widgets pavichchi karanna meka true thiyenna ona
+  uses-material-design: true
+
+  # Assets (Images/Logos) pavichchi karanavanam meka un-comment karanna
+  # assets:
+  #   - assets/images/
