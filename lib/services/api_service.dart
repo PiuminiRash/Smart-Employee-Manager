@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/employee.dart';
+import 'package:flutter/foundation.dart';
 
 class ApiService {
   // Oyaage MockAPI link eka methanata danna
@@ -41,5 +42,27 @@ class ApiService {
   Future<bool> deleteEmployee(String id) async {
     final response = await http.delete(Uri.parse('$baseUrl/$id'));
     return response.statusCode == 200;
+  }
+
+  Future<bool> markAttendance(Map<String, dynamic> attendanceData) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/attendance'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(attendanceData),
+      );
+      return response.statusCode == 201;
+    } catch (e) {
+      debugPrint(e.toString());
+      return false;
+    }
+  }
+
+  Future<List<dynamic>> getAttendance() async {
+    final response = await http.get(Uri.parse('$baseUrl/attendance'));
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+    return [];
   }
 }

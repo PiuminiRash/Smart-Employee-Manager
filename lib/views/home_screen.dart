@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/employee_view_model.dart';
 import 'add_employee_screen.dart';
+import 'employee_details_screen.dart'; // මේක import කරන්න අමතක කරන්න එපා
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,14 +15,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // App eka open weddima data fetch karanna
     Future.microtask(() =>
         Provider.of<EmployeeViewModel>(context, listen: false).fetchEmployees());
   }
 
   @override
   Widget build(BuildContext context) {
-    // ViewModel eka kiyawanna
     final viewModel = context.watch<EmployeeViewModel>();
 
     return Scaffold(
@@ -52,23 +51,20 @@ class _HomeScreenState extends State<HomeScreen> {
           final employee = viewModel.employees[index];
           return Card(
             elevation: 3,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               onTap: () {
-                // Update/Edit feature: Card eka click kalama Edit screen ekata yanawa
+                // 1. Profile එක බලන්න යමු
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AddEmployeeScreen(employee: employee),
+                    builder: (context) => EmployeeDetailsScreen(employee: employee),
                   ),
                 );
               },
               leading: CircleAvatar(
-                // Error fix: withValues pavichchi kala
                 backgroundColor: Colors.blueAccent.withValues(alpha: 0.1),
                 child: Text(employee.name[0].toUpperCase(),
                     style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold)),
@@ -80,14 +76,29 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   const SizedBox(height: 4),
                   Text(employee.designation, style: const TextStyle(color: Colors.black87)),
-                  Text(employee.department, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text("NIC: ${employee.nic}", style: const TextStyle(fontSize: 12, color: Colors.blueGrey)),
                 ],
               ),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                onPressed: () {
-                  _showDeleteDialog(context, viewModel, employee.id!);
-                },
+              trailing: Row( // Edit සහ Delete icons දෙකම එක පේළියට
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined, color: Colors.blue),
+                    onPressed: () {
+                      // 2. Edit Screen එකට යමු
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddEmployeeScreen(employee: employee),
+                        ),
+                      );
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                    onPressed: () => _showDeleteDialog(context, viewModel, employee.id!),
+                  ),
+                ],
               ),
             ),
           );
