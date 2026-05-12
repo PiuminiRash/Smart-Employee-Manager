@@ -12,11 +12,10 @@ dependencies:
     sdk: flutter
 
   intl: ^0.19.0
-
   # UI eke icons walata
   cupertino_icons: ^1.0.8
 
-  # MockAPI ekka CRUD (GET, POST, PUT, DELETE) karanna
+  # MockAPI ekka CRUD (GET, POST, PUT, DELETE)
   http: ^1.1.0
 
   # MVVM architecture eka saha data handle karanna (State Management)

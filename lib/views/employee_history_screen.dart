@@ -10,10 +10,10 @@ class EmployeeHistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ViewModel එකට සම්බන්ධ වීම
     final attendanceVM = Provider.of<AttendanceViewModel>(context);
 
-    // 1. මේ සේවකයාගේ NIC එකට අදාළ records පමණක් filter කර අලුත්ම ඒවා උඩට එන ලෙස සකස් කිරීම
+    // දැනට Login වී සිටින සේවකයාගේ NIC එකට අදාළ දත්ත පමණක් ලබාගෙන,
+    // අලුත්ම දත්ත මුලින් පෙනෙන ලෙස (Reversed) සකස් කිරීම.
     List<Attendance> myRecords = attendanceVM.attendanceList
         .where((record) => record.employeeNic == employeeNic)
         .toList()
@@ -41,7 +41,7 @@ class EmployeeHistoryScreen extends StatelessWidget {
         ),
       )
           : ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.only(top: 10, bottom: 20), // EdgeInsets.only භාවිතා කළා
         itemCount: myRecords.length,
         itemBuilder: (context, index) {
           final record = myRecords[index];
@@ -54,22 +54,22 @@ class EmployeeHistoryScreen extends StatelessWidget {
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.teal.withValues(alpha: 0.1),
+                  color: Colors.teal.withValues(alpha: 0.1), // withValues භාවිතා කළා
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.calendar_today, color: Colors.teal),
               ),
               title: Text(
-                record.date, // දිනය (YYYY-MM-DD)
+                record.date,
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
               ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 5),
-                  // Status Badge (Present/Late)
+                  // Status Badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                     decoration: BoxDecoration(
                       color: record.status == "Late"
                           ? Colors.red.withValues(alpha: 0.1)
@@ -91,25 +91,23 @@ class EmployeeHistoryScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  // Check-In පෙන්වන කොටස
+                  // Check-In Time
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(Icons.arrow_downward, size: 14, color: Colors.green),
-                      const SizedBox(width: 4),
-                      Text("In: ${record.checkIn}",
+                      Text(" In: ${record.checkIn}",
                           style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.green)),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  // Check-Out පෙන්වන කොටස
+                  const SizedBox(height: 4),
+                  // Check-Out Time
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(Icons.arrow_upward, size: 14, color: Colors.orange),
-                      const SizedBox(width: 4),
                       Text(
-                        "Out: ${record.checkOut ?? '--:--'}",
+                        " Out: ${record.checkOut ?? '--:--'}",
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           color: record.checkOut == null ? Colors.grey : Colors.orange,

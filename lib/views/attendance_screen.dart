@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/employee.dart';
 import '../view_models/employee_view_model.dart';
+import '../view_models/attendance_view_model.dart'; // අලුත් ViewModel එක
 
 class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({super.key});
@@ -13,6 +13,7 @@ class AttendanceScreen extends StatefulWidget {
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
   final TextEditingController _nicController = TextEditingController();
+  bool _isProcessing = false;
 
   @override
   void dispose() {
@@ -20,58 +21,64 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     super.dispose();
   }
 
-  // Attendance එක handle කරන ප්‍රධාන function එක
   void _handleAttendance(bool isCheckIn) async {
-    final viewModel = Provider.of<EmployeeViewModel>(context, listen: false);
+    final employeeVM = Provider.of<EmployeeViewModel>(context, listen: false);
+    final attendanceVM = Provider.of<AttendanceViewModel>(context, listen: false);
+
     String nicInput = _nicController.text.trim();
 
-    // 1. Input එක හිස්දැයි බැලීම
     if (nicInput.isEmpty) {
       _showMsg("Please enter your NIC number", Colors.redAccent);
       return;
     }
 
-    // 2. සේවකයා අපේ system එකේ ඉන්නවද කියලා NIC එකෙන් check කරනවා
-    // firstWhere පාවිච්චි කරලා අදාළ employee object එක ගන්නවා
-    final Employee employee = viewModel.employees.firstWhere(
+    setState(() => _isProcessing = true);
+
+    // 1. Employee ලැයිස්තුවෙන් අදාළ සේවකයාව සොයා ගැනීම
+    final Employee employee = employeeVM.employees.firstWhere(
           (emp) => emp.nic == nicInput,
-      orElse: () => Employee(nic: '', name: '', department: '', designation: '', salary: 0),
+      orElse: () => Employee(nic: '', name: '', role: '', email: '', department: '', designation: '', salary: 0),
     );
 
     if (employee.nic.isEmpty) {
       _showMsg("Employee not found! Please check the NIC.", Colors.orange);
+      setState(() => _isProcessing = false);
       return;
     }
 
-    // 3. Date සහ Time සකසා ගැනීම
-    String currentTime = DateFormat('hh:mm a').format(DateTime.now());
-    String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
-
-    // 4. API එකට යවන්න ඕන data structure එක (මෙය පසුව ViewModel එකට සම්බන්ධ කරන්න)
-    Map<String, dynamic> attendanceRecord = {
-      "employeeNic": employee.nic,
-      "employeeName": employee.name,
-      "date": currentDate,
-      "status": isCheckIn ? "In" : "Out",
-      "time": currentTime,
-    };
-
-    // දැනට UI එකේ සාර්ථකයි කියලා පෙන්වනවා
-    _showMsg(
-        "${employee.name} ${isCheckIn ? 'Checked In' : 'Checked Out'} at $currentTime",
-        Colors.green
+    // 2. AttendanceViewModel එක හරහා logic එක ක්‍රියාත්මක කිරීම
+    bool success = await attendanceVM.processAttendance(
+      nic: employee.nic,
+      name: employee.name,
+      dept: employee.department,
+      isCheckIn: isCheckIn,
     );
 
-    debugPrint("Attendance Log: $attendanceRecord"); // Debugging සඳහා
-    _nicController.clear();
+    if (success) {
+      _showMsg(
+          "${employee.name} ${isCheckIn ? 'Checked In' : 'Checked Out'} Successfully!",
+          Colors.green
+      );
+      _nicController.clear();
+    } else {
+      // Check-in/out අසාර්ථක වුවහොත් (උදා: දැනටමත් check-in වී ඇත්නම්)
+      String errorMsg = isCheckIn
+          ? "Already checked in for today!"
+          : "You must Check-In before Checking-Out!";
+      _showMsg(errorMsg, Colors.orange);
+    }
+
+    setState(() => _isProcessing = false);
   }
 
   void _showMsg(String msg, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(msg),
+          content: Text(msg, style: const TextStyle(fontWeight: FontWeight.bold)),
           backgroundColor: color,
           behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          margin: const EdgeInsets.all(15),
         )
     );
   }
@@ -83,10 +90,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         title: const Text("Mark Attendance", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.teal,
         elevation: 0,
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
+            // Top Header Icon
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 40),
@@ -99,6 +108,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               ),
               child: const Icon(Icons.qr_code_scanner, size: 100, color: Colors.white),
             ),
+
             Padding(
               padding: const EdgeInsets.all(25.0),
               child: Column(
@@ -108,16 +118,23 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 20),
+
+                  // NIC Input Field
                   TextField(
                     controller: _nicController,
+                    enabled: !_isProcessing,
                     decoration: InputDecoration(
                       labelText: "NIC Number",
                       hintText: "e.g. 981234567V",
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
                       prefixIcon: const Icon(Icons.badge_outlined),
+                      filled: true,
+                      fillColor: Colors.grey[100],
                     ),
                   ),
                   const SizedBox(height: 30),
+
+                  // Action Buttons
                   Row(
                     children: [
                       Expanded(
@@ -125,6 +142,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           label: "Check In",
                           icon: Icons.login,
                           color: Colors.green,
+                          isLoading: _isProcessing,
                           onPressed: () => _handleAttendance(true),
                         ),
                       ),
@@ -134,6 +152,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           label: "Check Out",
                           icon: Icons.logout,
                           color: Colors.orange,
+                          isLoading: _isProcessing,
                           onPressed: () => _handleAttendance(false),
                         ),
                       ),
@@ -148,7 +167,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
-  Widget _attendanceButton({required String label, required IconData icon, required Color color, required VoidCallback onPressed}) {
+  Widget _attendanceButton({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required bool isLoading,
+    required VoidCallback onPressed
+  }) {
     return ElevatedButton.icon(
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
@@ -157,8 +182,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 5,
       ),
-      onPressed: onPressed,
-      icon: Icon(icon),
+      onPressed: isLoading ? null : onPressed,
+      icon: isLoading
+          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+          : Icon(icon),
       label: Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
     );
   }

@@ -4,13 +4,14 @@ import '../view_models/employee_view_model.dart';
 import 'home_screen.dart';
 import 'add_employee_screen.dart';
 import 'attendance_screen.dart';
-import 'attendance_history_screen.dart';
+import 'employee_history_screen.dart'; // නම නිවැරදිදැයි බලන්න
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // context.watch භාවිතයෙන් දත්ත වෙනස් වන විට UI එක auto refresh වේ
     final viewModel = context.watch<EmployeeViewModel>();
 
     int totalEmployees = viewModel.employees.length;
@@ -27,7 +28,6 @@ class DashboardScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: RefreshIndicator(
-        // 'onPressed' වෙනුවට මෙතන 'onRefresh' විය යුතුයි
         onRefresh: () async {
           await viewModel.fetchEmployees();
         },
@@ -87,8 +87,17 @@ class DashboardScreen extends StatelessWidget {
                       Colors.indigo, const AddEmployeeScreen()),
                   _buildActionButton(context, "Mark Attendance", Icons.fact_check,
                       Colors.teal, const AttendanceScreen()),
-                  _buildActionButton(context, "Attendance Log", Icons.history,
-                      Colors.brown, const AttendanceHistoryScreen()),
+
+                  // මෙතන තිබුණු 'const' එක ඉවත් කර ඇත (Compile-time error එක සඳහා විසඳුම)
+                  _buildActionButton(
+                    context,
+                    "Attendance Log",
+                    Icons.history,
+                    Colors.brown,
+                    // Admin ට සියලුම ලොග් බැලීමට අවශ්‍ය නම් මෙතන parameter එකක් නැති Screen එකක් දිය හැක
+                    // සේවකයාගේ නම්: EmployeeHistoryScreen(employeeNic: 'USER_NIC_HERE')
+                    const EmployeeHistoryScreen(employeeNic: ""),
+                  ),
                 ],
               ),
             ],
@@ -98,6 +107,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  // සාරාංශ පෙන්වන කුඩා Card
   Widget _buildSummaryCard(String title, String value, IconData icon, Color color) {
     return Expanded(
       child: Card(
@@ -120,12 +130,12 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  // පඩි විස්තර පෙන්වන ලොකු Card එක
   Widget _buildLargeSummaryCard(String title, String value, IconData icon, Color color) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        // withValues භාවිතා කරමින් deprecated warning එක ඉවත් කිරීම
         gradient: LinearGradient(colors: [color, color.withValues(alpha: 0.8)]),
         borderRadius: BorderRadius.circular(15),
         boxShadow: [BoxShadow(color: color.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))],
@@ -154,8 +164,10 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  // Quick Action Buttons (OnTap Navigator සහිතව)
   Widget _buildActionButton(BuildContext context, String title, IconData icon, Color color, Widget screen) {
     return InkWell(
+      borderRadius: BorderRadius.circular(15),
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) => screen));
       },
