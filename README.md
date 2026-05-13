@@ -1,118 +1,63 @@
 # Smart Employee Manager
 ### Project Overview
-**Smart Employee Manager** is a mobile application developed as part of the Software Engineer Intern assignment (2025). The application is designed to reflect real-world development scenarios, providing a streamlined platform for managing employee data through a clean and intuitive user interface.
+**Smart Employee Manager** is a robust mobile application developed for the **Software Engineer Intern Assignment (2025)**. The application is built to handle complex real-world HR scenarios, focusing on secure authentication, employee record management (CRUD), and an automated attendance and leave system. It follows the **MVVM architecture** to ensure the code is modular, maintainable, and scalable.
 
 ### Technology Stack
-**Technology:** Flutter
-**Language:** Dart
-**Architecture:** MVVM (Model-View-ViewModel)
-**UI Framework:** Flutter widgets
-**Networking:** Dio / http package for API integration
+* **Framework:** Flutter (Android & iOS)
+* **Language:** Dart
+* **Architecture:** MVVM (Model-View-ViewModel)
+* **State Management:** Provider
+* **Networking:** http / dio package
+* **Local Storage/Mock API:** Integrated for data persistence
 
+### Core Features & Functionalities
+#### 1. Advanced Authentication System
+* **Initial Login Security:** Implemented a secure login flow where, upon the first login attempt, a **verification code is sent to the user's email** to ensure account authenticity.
+* **User Registration:** Secure signup process for new employees/admins.
+* **Session Management:** Secure logout functionality to protect user data.
 
+#### 2. Comprehensive Employee Management (CRUD)
+* **Create:** Interface to add new employees with details like NIC, Name, and Department.
+* **Read:** Real-time display of employee lists and individual profiles.
+* **Update:** Ability to modify existing employee records.
+* **Delete:** Functionality to remove employee records from the system.
 
-### Key Features
-**Authentication:** * Secure Login and Registration functionalities.
-* Implementation using mock APIs and local storage.
+#### 3. Real-time Attendance System
+* **Check-in / Check-out:** A simplified user interface for employees to log their daily work hours.
+* **Automatic Timestamping:** Records the exact time and date using `intl` formatting.
+* **Attendance Logs:** A detailed history for admins to monitor punctuality and presence.
 
-**CRUD Operations:** * Full implementation of Create, Read, Update, and Delete functionalities for employee records.
-**Search & Filtering:** * Search functionality allows users to find items by name.
-* Advanced filtering based on criteria such as Department and Job Role.
+#### 4. Leave Request & Approval Workflow
+* **Request Submission:** Employees can submit leave requests with specific types (e.g., Casual, Sick) and reasons.
+* **Admin Approval:** A dedicated screen for admins to view pending requests and either **Approve** or **Reject** them instantly.
+* **Status Tracking:** Real-time status updates (Pending/Approved/Rejected) for employees.
 
-*
-**UI/UX Design:** * Responsive and scrollable layouts designed for various device sizes.
-* Intuitive navigation and user-friendly interface.
+#### 5. Search & Dynamic Filtering
+* **Search:** Quick search functionality to find employees by name.
+* **Filtering:** Advanced filtering based on **Department** or **Designation** to manage large datasets easily.
 
-
-
-
-*
-**Enhancements:** * Displays logged-in user details.
-
-
-* Logout functionality.
-
-
-* Robust error handling for network failures and invalid inputs.
-
-
-
-
-
-### API Integration
-
-The project prioritizes proper API integration using mock services to demonstrate professional data handling.
-
-*
-**Mock Tools:** MockAPI.io / Reqres.in
-
-
-* **Endpoints Used:**
-*
-`GET /employees`: Retrieve all employee records.
-
-
-*
-`POST /employees`: Create a new employee entry.
-
-
-*
-`PUT /employees/:id`: Update existing employee details.
-
-
-*
-`DELETE /employees/:id`: Remove an employee from the system.
-
-
-
-
+#### 6. Admin Dashboard & Analytics
+* **Company Overview:** High-level summary showing the total number of employees and active leave counts.
+* **Payroll Calculation:** Automated calculation of the **Total Monthly Payroll cost** based on employee salary data.
 
 ### Setup and Installation
-
 1. **Clone the Repository:**
 ```bash
 git clone https://github.com/your-username/smart-employee-manager.git
-
 ```
-
 
 2. **Install Dependencies:**
 ```bash
 flutter pub get
-
 ```
-
 
 3. **Run the Application:**
-   Ensure you have an emulator or physical device connected, then run:
 ```bash
 flutter run
-
 ```
 
-
-4. **Generate Build:**
-* To generate an Android APK: `flutter build apk --split-per-abi`.
-
-
-
-
-
-### Evaluation Criteria Compliance
-
-*
-**Clean Code:** The project follows a modular and maintainable structure.
-
-
-*
-**Functionality:** All core features including CRUD, Search, and Filtering are fully operational.
-
-
-*
-**API Handling:** Correct usage of networking libraries with appropriate error states.
-
-
-
+### Design Principles
+* **Clean Code:** Strictly followed naming conventions and modularized the ViewModels and Views.
+* **Responsive UI:** Designed using Flutter widgets to be compatible with various screen sizes (Mobile & Tablet).
+* **Error Handling:** Implemented validation for NIC, email formats, and network failure handling.
 ---
-
-This project was completed within the 2-day time allocation as per the assignment guidelines.
