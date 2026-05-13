@@ -5,7 +5,7 @@ import '../models/employee.dart';
 import '../view_models/attendance_view_model.dart';
 import 'employee_history_screen.dart';
 import 'employee_salary_screen.dart';
-import 'leave_request_screen.dart';
+import 'employee_leave_request_screen.dart';
 import 'login_screen.dart';
 
 class EmployeeDashboard extends StatefulWidget {
@@ -55,7 +55,6 @@ class _EmployeeDashboardState extends State<EmployeeDashboard> {
   Widget build(BuildContext context) {
     final attendanceVM = Provider.of<AttendanceViewModel>(context);
 
-    // සේවකයාට අදාළ දත්ත පමණක් පෙරීම (Filter)
     int totalDays = attendanceVM.attendanceList
         .where((a) => a.employeeNic == widget.employee.nic).length;
     int lateDays = attendanceVM.attendanceList

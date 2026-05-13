@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'view_models/employee_view_model.dart';
 import 'view_models/attendance_view_model.dart';
 import 'views/login_screen.dart';
-import 'views/home_screen.dart';
+import 'views/employee_list_view.dart';
 import 'views/employee_dashboard.dart';
 
 void main() {

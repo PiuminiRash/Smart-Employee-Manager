@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/employee_view_model.dart';
-import 'add_employee_screen.dart';
+import 'admin_add_employee_screen.dart';
 import 'employee_details_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -25,7 +25,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final viewModel = context.watch<EmployeeViewModel>();
 
-    // සෙවුම් පදයට අනුව සේවකයින් පෙරීම (Filtering logic)
     final filteredEmployees = viewModel.employees.where((emp) {
       final query = _searchQuery.toLowerCase();
       return emp.name.toLowerCase().contains(query) ||
@@ -51,7 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
-          // --- 1. SEARCH BAR ---
           Padding(
             padding: const EdgeInsets.all(15.0),
             child: TextField(
