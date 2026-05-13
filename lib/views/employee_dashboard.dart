@@ -1,197 +1,161 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../models/employee.dart';
+import '../view_models/attendance_view_model.dart';
+import 'employee_history_screen.dart';
+import 'employee_salary_screen.dart';
+import 'leave_request_screen.dart';
+import 'login_screen.dart';
 
-class LeaveRequestScreen extends StatefulWidget {
+class EmployeeDashboard extends StatefulWidget {
   final Employee employee;
 
-  const LeaveRequestScreen({super.key, required this.employee});
+  const EmployeeDashboard({super.key, required this.employee});
 
   @override
-  State<LeaveRequestScreen> createState() => _LeaveRequestScreenState();
+  State<EmployeeDashboard> createState() => _EmployeeDashboardState();
 }
 
-class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
-  final _formKey = GlobalKey<FormState>();
-  String _selectedLeaveType = 'Annual Leave';
-  DateTime _selectedDate = DateTime.now();
-  final TextEditingController _reasonController = TextEditingController();
+class _EmployeeDashboardState extends State<EmployeeDashboard> {
+  bool _isCheckedIn = false;
+  String _statusMessage = "You haven't marked attendance today.";
 
-  final List<String> _leaveTypes = ['Annual Leave', 'Sick Leave', 'Casual Leave', 'Short Leave'];
+  void _handleAttendance(bool isCheckIn) async {
+    final attendanceVM = Provider.of<AttendanceViewModel>(context, listen: false);
 
-  // --- පරීක්ෂා කිරීම සඳහා Dummy Data ---
-  // පසුකාලීනව මේවා Database හෝ ViewModel එකෙන් ලබාගන්නා ලෙස සකස් කළ හැක.
-  final List<Map<String, dynamic>> _myLeaves = [
-    {"date": "2026-05-20", "type": "Sick Leave", "status": "Approved", "color": Colors.green},
-    {"date": "2026-05-25", "type": "Annual Leave", "status": "Pending", "color": Colors.orange},
-    {"date": "2026-05-10", "type": "Casual Leave", "status": "Rejected", "color": Colors.red},
-  ];
+    bool success = await attendanceVM.processAttendance(
+      nic: widget.employee.nic,
+      name: widget.employee.name,
+      dept: widget.employee.department,
+      isCheckIn: isCheckIn,
+    );
 
-  void _submitLeave() {
-    if (_formKey.currentState!.validate()) {
-      // මෙතනදී නිවාඩු ඉල්ලීම Database එකට යැවීමේ logic එක පසුව එක් කළ හැක.
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Leave request submitted successfully!"),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.purple,
-        ),
-      );
-      _reasonController.clear(); // Submit කළ පසු reason එක clear කරයි.
+    if (success) {
+      String currentTime = DateFormat('hh:mm a').format(DateTime.now());
+      setState(() {
+        _isCheckedIn = isCheckIn;
+        _statusMessage = isCheckIn
+            ? "Checked In at $currentTime"
+            : "Checked Out at $currentTime";
+      });
+      _showSnackBar("Attendance marked successfully!", Colors.green);
+    } else {
+      _showSnackBar("Action failed or already marked.", Colors.orange);
     }
+  }
+
+  void _showSnackBar(String msg, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg), backgroundColor: color, behavior: SnackBarBehavior.floating)
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final attendanceVM = Provider.of<AttendanceViewModel>(context);
+
+    // සේවකයාට අදාළ දත්ත පමණක් පෙරීම (Filter)
+    int totalDays = attendanceVM.attendanceList
+        .where((a) => a.employeeNic == widget.employee.nic).length;
+    int lateDays = attendanceVM.attendanceList
+        .where((a) => a.employeeNic == widget.employee.nic && a.status == "Late").length;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: const Color(0xFFF4F7FA),
       appBar: AppBar(
-        title: const Text("Leave Management", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        backgroundColor: Colors.purple,
+        title: const Text("Employee Workspace",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.indigo,
         elevation: 0,
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: () {
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      (route) => false
+              );
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // --- කොටස 1: අලුත් නිවාඩුවක් Apply කරන Form එක ---
+            _buildProfileHeader(),
+
+            // --- 1. DAILY ATTENDANCE SECTION ---
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                ),
+                child: Column(
+                  children: [
+                    const Text("Daily Attendance", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 10),
+                    Text(_statusMessage, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                    const SizedBox(height: 20),
+                    Row(
                       children: [
-                        const Row(
-                          children: [
-                            Icon(Icons.add_circle_outline, color: Colors.purple),
-                            SizedBox(width: 10),
-                            Text("Apply for New Leave", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.purple)),
-                          ],
+                        Expanded(
+                          child: _attendanceBtn("Check In", Icons.login, Colors.green, !_isCheckedIn, true),
                         ),
-                        const Divider(height: 25),
-
-                        _buildLabel("Leave Type"),
-                        DropdownButtonFormField(
-                          value: _selectedLeaveType,
-                          items: _leaveTypes.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
-                          onChanged: (val) => setState(() => _selectedLeaveType = val as String),
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          ),
-                        ),
-
-                        const SizedBox(height: 15),
-                        _buildLabel("Select Date"),
-                        InkWell(
-                          onTap: () async {
-                            DateTime? picked = await showDatePicker(
-                              context: context,
-                              initialDate: _selectedDate,
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime(2027),
-                            );
-                            if (picked != null) setState(() => _selectedDate = picked);
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(15),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey.shade400),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(DateFormat('yyyy-MM-dd').format(_selectedDate), style: const TextStyle(fontSize: 16)),
-                                const Icon(Icons.calendar_month, color: Colors.purple),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 15),
-                        _buildLabel("Reason"),
-                        TextFormField(
-                          controller: _reasonController,
-                          maxLines: 2,
-                          decoration: InputDecoration(
-                            hintText: "Why do you need leave?",
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                          ),
-                          validator: (v) => v!.isEmpty ? "Please enter a reason" : null,
-                        ),
-
-                        const SizedBox(height: 25),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.purple,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              elevation: 2,
-                            ),
-                            onPressed: _submitLeave,
-                            child: const Text("SUBMIT REQUEST", style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.1)),
-                          ),
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: _attendanceBtn("Check Out", Icons.logout, Colors.orange, _isCheckedIn, false),
                         ),
                       ],
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
 
-            // --- කොටස 2: කලින් ඉල්ලූ නිවාඩු ලැයිස්තුව ---
+            // --- 2. QUICK MENU GRID ---
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 3,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                children: [
+                  _menuItem(context, "History", Icons.history, Colors.teal,
+                      EmployeeHistoryScreen(employeeNic: widget.employee.nic)),
+                  _menuItem(context, "Paysheet", Icons.description, Colors.blue,
+                      EmployeeSalaryScreen(employee: widget.employee)),
+                  _menuItem(context, "Leave", Icons.event_note, Colors.purple,
+                      LeaveRequestScreen(employee: widget.employee)),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // --- 3. SUMMARY DETAILS SECTION ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10.0),
-                    child: Text("Recent Leave Requests", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  ),
-
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _myLeaves.length,
-                    itemBuilder: (context, index) {
-                      final leave = _myLeaves[index];
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          leading: CircleAvatar(
-                            backgroundColor: leave['color'].withValues(alpha: 0.1),
-                            child: Icon(Icons.event_note, color: leave['color']),
-                          ),
-                          title: Text(leave['type'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text("Requested for: ${leave['date']}"),
-                          trailing: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: leave['color'].withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: leave['color']),
-                            ),
-                            child: Text(
-                              leave['status'],
-                              style: TextStyle(color: leave['color'], fontSize: 12, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
+                  const Text("Monthly Summary",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.indigo)),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      _summaryCard("Total Present", "$totalDays Days", Icons.calendar_month, Colors.blue),
+                      const SizedBox(width: 10),
+                      _summaryCard("Late Arrivals", "$lateDays Days", Icons.timer_outlined, Colors.red),
+                    ],
                   ),
                   const SizedBox(height: 20),
                 ],
@@ -203,10 +167,84 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
     );
   }
 
-  Widget _buildLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 5.0),
-      child: Text(text, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.black87)),
+  Widget _buildProfileHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(25),
+      decoration: const BoxDecoration(
+        color: Colors.indigo,
+        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30), bottomRight: Radius.circular(30)),
+      ),
+      child: Column(
+        children: [
+          const CircleAvatar(radius: 40, backgroundColor: Colors.white,
+              child: Icon(Icons.person, size: 50, color: Colors.indigo)),
+          const SizedBox(height: 15),
+          Text(widget.employee.name,
+              style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(widget.employee.designation, style: const TextStyle(color: Colors.white70)),
+        ],
+      ),
+    );
+  }
+
+  Widget _attendanceBtn(String label, IconData icon, Color color, bool enabled, bool isCheckIn) {
+    return ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: Colors.grey[300],
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      onPressed: enabled ? () => _handleAttendance(isCheckIn) : null,
+      icon: Icon(icon, size: 18),
+      label: Text(label, style: const TextStyle(fontSize: 14)),
+    );
+  }
+
+  Widget _summaryCard(String title, String value, IconData icon, Color color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: color.withOpacity(0.2)),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 8),
+            Text(title, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+            const SizedBox(height: 2),
+            Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _menuItem(BuildContext context, String title, IconData icon, Color color, Widget? target) {
+    return InkWell(
+      onTap: () {
+        if (target != null) Navigator.push(context, MaterialPageRoute(builder: (context) => target));
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 28, color: color),
+            const SizedBox(height: 5),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+          ],
+        ),
+      ),
     );
   }
 }

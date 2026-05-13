@@ -10,8 +10,6 @@ class EmployeeViewModel extends ChangeNotifier {
   List<Employee> get employees => _employees;
   bool get isLoading => _isLoading;
 
-  // --- API Methods ---
-
   Future<void> fetchEmployees() async {
     _isLoading = true;
     notifyListeners();
@@ -52,24 +50,18 @@ class EmployeeViewModel extends ChangeNotifier {
     }
   }
 
-  // --- Payroll Calculation Logic (Sri Lankan Standards) ---
-
-  // Sevekayaage vatupen 8% k EPF valata adu wenava
   double calculateEmployeeEPF(double basicSalary) {
     return basicSalary * 0.08;
   }
 
-  // Ayathanaya (Company) visin 12% k EPF valata saha 3% k ETF valata gewanava
   double calculateCompanyContribution(double basicSalary) {
     return basicSalary * 0.15; // 12% + 3%
   }
 
-  // Sevekayaata athata labena vatupa (Net Salary)
   double calculateNetSalary(double basicSalary) {
     return basicSalary - calculateEmployeeEPF(basicSalary);
   }
 
-  // Dashboard ekata ona wena Total Salary Cost eka (Okkoma employeeslata yana wiyadama)
   double getTotalPayrollCost() {
     return _employees.fold(0, (sum, emp) => sum + emp.salary);
   }

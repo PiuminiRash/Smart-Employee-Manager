@@ -21,7 +21,6 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
 
   void _submitLeave() {
     if (_formKey.currentState!.validate()) {
-      // මෙතනදී API එකකට හෝ ViewModel එකකට දත්ත යැවිය හැක
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Leave request submitted successfully!")),
       );

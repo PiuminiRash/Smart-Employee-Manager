@@ -31,7 +31,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     super.dispose();
   }
 
-  // 1. Email එකට Code එක යැවීම
   void _handleSendCode() async {
     String nic = _nicController.text.trim();
     String pass = _passController.text.trim();
@@ -52,7 +51,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     await viewModel.fetchEmployees();
 
     try {
-      // NIC එක තියෙනවද බලනවා
       _foundEmployee = viewModel.employees.firstWhere((emp) => emp.nic == nic);
 
       if (_foundEmployee!.isActivated) {
@@ -61,7 +59,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         return;
       }
 
-      // OTP එකක් හදලා Email එකට යවනවා
       _generatedOTP = EmailService.generateOTP();
       bool success = await EmailService.sendOTP(
           _foundEmployee!.email,
@@ -80,7 +77,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
   }
 
-  // 2. Code එක Verify කරලා Account එක හැදීම
   void _handleCreateAccount() async {
     if (_otpInputController.text.trim() != _generatedOTP) {
       _showMsg("Invalid OTP Code!", Colors.red);
@@ -105,7 +101,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     await Provider.of<EmployeeViewModel>(context, listen: false)
         .updateEmployee(_foundEmployee!.id!, updatedEmp);
 
-    if (!mounted) return; // Async gap එක විසඳීමට
+    if (!mounted) return;
 
     _showMsg("Account created successfully!", Colors.green);
     Navigator.pop(context);
@@ -137,7 +133,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
             const SizedBox(height: 25),
 
-            // Send Code Button
             if (!_otpSent)
               SizedBox(
                 width: double.infinity,
@@ -148,7 +143,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 ),
               ),
 
-            // OTP Input Area (Code එක යැවූ පසු පමණක් පෙන්වයි)
             if (_otpSent) ...[
               const Divider(height: 40),
               const Text("Enter the 4-digit code sent to your email", style: TextStyle(fontWeight: FontWeight.bold)),

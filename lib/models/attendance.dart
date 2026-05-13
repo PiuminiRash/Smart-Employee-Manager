@@ -1,25 +1,24 @@
 class Attendance {
   final String? id;
-  final String employeeNic;  // සේවකයා හඳුනාගැනීමට (Primary Key ලෙස)
+  final String employeeNic;
   final String employeeName;
-  final String department;   // වාර්තා වර්ගීකරණය සඳහා (Filtering)
-  final String date;         // දිනය (YYYY-MM-DD)
-  final String checkIn;      // ඇතුළු වූ වේලාව
-  final String? checkOut;    // පිටවූ වේලාව (මුලින් null විය හැක)
-  final String status;       // 'Present', 'Late', 'Half Day' වැනි තත්ත්වයන්
+  final String department;
+  final String date;
+  final String checkIn;
+  final String? checkOut;
+  final String status;
 
   Attendance({
     this.id,
     required this.employeeNic,
     required this.employeeName,
-    required this.department, // අනිවාර්යයෙන්ම අවශ්‍යයි
+    required this.department,
     required this.date,
     required this.checkIn,
     this.checkOut,
-    this.status = 'Present',  // Default අගය Present ලෙස ලබා දී ඇත
+    this.status = 'Present',
   });
 
-  // JSON වලින් Data ලබා ගැනීම (API/Database එකෙන් එන දත්ත)
   factory Attendance.fromJson(Map<String, dynamic> json) {
     return Attendance(
       id: json['id'],
@@ -33,7 +32,6 @@ class Attendance {
     );
   }
 
-  // API එකට Data යැවීම (Save/Update සඳහා)
   Map<String, dynamic> toJson() {
     return {
       'employeeNic': employeeNic,

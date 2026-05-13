@@ -2,10 +2,10 @@ class LeaveRequest {
   final String id;
   final String employeeNic;
   final String employeeName;
-  final String leaveType; // e.g., Sick, Annual, Casual
+  final String leaveType;
   final String date;
   final String reason;
-  String status; // Pending, Approved, Rejected
+  String status;
 
   LeaveRequest({
     required this.id,

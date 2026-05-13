@@ -12,16 +12,13 @@ class EmployeeSalaryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final attendanceVM = Provider.of<AttendanceViewModel>(context);
 
-    // 1. ගණනය කිරීම් (Calculations)
     int totalPresentDays = attendanceVM.attendanceList
         .where((a) => a.employeeNic == employee.nic)
         .length;
 
-    // උදාහරණයක් ලෙස දිනකට ගෙවීම් ගණනය කිරීම (Basic / 30)
     double dailyRate = employee.salary / 30;
     double earnedSalary = dailyRate * totalPresentDays;
 
-    // දීමනා සහ කැපීම් (උදාහරණ ලෙස)
     double allowances = 5000.00;
     double deductions = earnedSalary * 0.08; // EPF 8% වැනි දෙයක්
     double netSalary = (earnedSalary + allowances) - deductions;
@@ -36,7 +33,6 @@ class EmployeeSalaryScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header - මාසය සහ මුළු ශුද්ධ වැටුප
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(30),
@@ -64,7 +60,6 @@ class EmployeeSalaryScreen extends StatelessWidget {
                   const Text("Salary Breakdown", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 15),
 
-                  // විස්තර සහිත Card එක
                   Card(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                     elevation: 3,

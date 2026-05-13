@@ -12,8 +12,6 @@ class EmployeeHistoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final attendanceVM = Provider.of<AttendanceViewModel>(context);
 
-    // දැනට Login වී සිටින සේවකයාගේ NIC එකට අදාළ දත්ත පමණක් ලබාගෙන,
-    // අලුත්ම දත්ත මුලින් පෙනෙන ලෙස (Reversed) සකස් කිරීම.
     List<Attendance> myRecords = attendanceVM.attendanceList
         .where((record) => record.employeeNic == employeeNic)
         .toList()

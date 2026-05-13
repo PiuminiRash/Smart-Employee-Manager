@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smart_employee_manager/views/admin_dashboard.dart';
 import '../view_models/employee_view_model.dart';
-import 'dashboard_screen.dart'; // Admin Dashboard
-import 'employee_dashboard.dart'; // Employee Dashboard
-import 'registration_screen.dart'; // Registration Screen
+import 'employee_dashboard.dart';
+import 'registration_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -30,26 +30,22 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoggingIn = true);
     final viewModel = Provider.of<EmployeeViewModel>(context, listen: false);
 
-    // නවතම දත්ත API එකෙන් ලබා ගැනීම
     await viewModel.fetchEmployees();
 
     try {
-      // 1. NIC එක මගින් සේවකයා සෙවීම
       final employee = viewModel.employees.firstWhere(
             (emp) => emp.nic == nic,
       );
 
-      // 2. Account එක Activate කර තිබේදැයි බැලීම
       if (!employee.isActivated) {
         _showSnackBar("Account not activated. Please use 'Create One'.", Colors.blue);
         setState(() => _isLoggingIn = false);
         return;
       }
 
-      // 3. Password එක පරීක්ෂා කිරීම
       if (employee.password == password) {
         if (employee.role == 'Admin') {
-          _goTo(const DashboardScreen());
+          _goTo(const AdminDashboard());
         } else {
           _goTo(EmployeeDashboard(employee: employee));
         }
@@ -93,7 +89,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 40),
 
-              // NIC Field
               TextField(
                 controller: _nicController,
                 decoration: InputDecoration(
@@ -104,7 +99,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Password Field
               TextField(
                 controller: _passwordController,
                 obscureText: _obscureText,
@@ -140,7 +134,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 25),
 
-              // Register Link
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

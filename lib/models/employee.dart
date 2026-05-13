@@ -2,13 +2,13 @@ class Employee {
   final String? id;
   final String name;
   final String nic;
-  final String role;         // 'Admin' හෝ 'Employee'
-  final String email;        // Activation OTP එක යැවීමට
+  final String role;
+  final String email;
   final String department;
   final String designation;
   final double salary;
-  final String password;     // Login වීම සඳහා (මුලින් හිස්ව පවතී)
-  final bool isActivated;    // Account එක සක්‍රීය කර ඇත්දැයි බැලීමට
+  final String password;
+  final bool isActivated;
 
   Employee({
     this.id,
@@ -23,7 +23,6 @@ class Employee {
     this.isActivated = false,
   });
 
-  // JSON වලින් Data ලබා ගැනීම (API එකෙන් එන දත්ත)
   factory Employee.fromJson(Map<String, dynamic> json) {
     return Employee(
       id: json['id'],
@@ -39,8 +38,6 @@ class Employee {
     );
   }
 
-  // API එකට Data යැවීම (Create/Update සඳහා)
-  // මෙතනදීත් ඔයාගේ UI එකේ පිළිවෙලටම Keys සකස් කර තියෙනවා
   Map<String, dynamic> toJson() {
     return {
       'name': name,

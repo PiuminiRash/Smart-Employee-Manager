@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 import 'view_models/employee_view_model.dart';
 import 'view_models/attendance_view_model.dart';
 import 'views/login_screen.dart';
-// import 'views/home_screen.dart'; // දැනට පාවිච්චි වෙන්නේ නැති නිසා comment කරා
+import 'views/home_screen.dart';
+import 'views/employee_dashboard.dart';
 
 void main() {
   runApp(
@@ -35,7 +36,6 @@ class MyApp extends StatelessWidget {
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
-      // LoginScreen එක මෙතන පාවිච්චි වන නිසා 'Unused import' error එක එන්නේ නැහැ
       home: const LoginScreen(),
     );
   }

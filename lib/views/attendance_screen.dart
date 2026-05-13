@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/employee.dart';
 import '../view_models/employee_view_model.dart';
-import '../view_models/attendance_view_model.dart'; // අලුත් ViewModel එක
+import '../view_models/attendance_view_model.dart';
 
 class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({super.key});
@@ -34,7 +34,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
     setState(() => _isProcessing = true);
 
-    // 1. Employee ලැයිස්තුවෙන් අදාළ සේවකයාව සොයා ගැනීම
     final Employee employee = employeeVM.employees.firstWhere(
           (emp) => emp.nic == nicInput,
       orElse: () => Employee(nic: '', name: '', role: '', email: '', department: '', designation: '', salary: 0),
@@ -46,7 +45,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       return;
     }
 
-    // 2. AttendanceViewModel එක හරහා logic එක ක්‍රියාත්මක කිරීම
     bool success = await attendanceVM.processAttendance(
       nic: employee.nic,
       name: employee.name,
@@ -61,7 +59,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       );
       _nicController.clear();
     } else {
-      // Check-in/out අසාර්ථක වුවහොත් (උදා: දැනටමත් check-in වී ඇත්නම්)
       String errorMsg = isCheckIn
           ? "Already checked in for today!"
           : "You must Check-In before Checking-Out!";
